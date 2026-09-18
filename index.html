@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مراجعة عبدالله العبيدي | Big Data Analytics</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: { extend: {
+    fontFamily: { ar:['Tajawal','sans-serif'], en:['"Space Grotesk"','sans-serif'] },
+    colors: { gold:{100:'#fbf0d0',200:'#f6e2a8',300:'#f0d07c',400:'#e9bc50',500:'#d9a52e',600:'#b9861c',700:'#8f6712'}, ink:'#060a17' }
+  }}
+}
+</script>
+<style>
+  *{ -webkit-tap-highlight-color: transparent; }
+  html{ scroll-behavior:smooth; }
+  body{ background:#060a17; color:#e8ecf6; font-family:'Tajawal',sans-serif; overflow-x:hidden; }
+  ::selection{ background:rgba(233,188,80,.35); color:#fff; }
+  ::-webkit-scrollbar{ width:9px; height:9px; }
+  ::-webkit-scrollbar-track{ background:#0a0f1f; }
+  ::-webkit-scrollbar-thumb{ background:linear-gradient(#d9a52e,#8f6712); border-radius:99px; }
+
+  /* ---------- Background art ---------- */
+  .aurora{ position:fixed; inset:0; z-index:-3; overflow:hidden; }
+  .blob{ position:absolute; border-radius:50%; filter:blur(90px); opacity:.5; mix-blend-mode:screen; }
+  .b1{ width:55vw; height:55vw; background:radial-gradient(circle,#3b2f8f,transparent 65%); top:-18vw; right:-12vw; animation:float1 22s ease-in-out infinite; }
+  .b2{ width:46vw; height:46vw; background:radial-gradient(circle,#7a5a12,transparent 65%); bottom:-16vw; left:-10vw; animation:float2 26s ease-in-out infinite; }
+  .b3{ width:34vw; height:34vw; background:radial-gradient(circle,#123f63,transparent 65%); top:35%; left:30%; animation:float1 30s ease-in-out infinite reverse; opacity:.35; }
+  @keyframes float1{ 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-5vw,4vh) scale(1.12)} }
+  @keyframes float2{ 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(4vw,-5vh) scale(1.08)} }
+  .grid-overlay{ position:fixed; inset:0; z-index:-2; background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px); background-size:56px 56px; mask-image:radial-gradient(ellipse at 50% 30%,black 30%,transparent 75%); }
+  #bgParticles{ position:fixed; inset:0; z-index:-1; pointer-events:none; }
+
+  /* ---------- Glass & gold ---------- */
+  .glass{ background:rgba(255,255,255,.045); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border:1px solid rgba(255,255,255,.09); }
+  .glass-strong{ background:rgba(13,18,36,.72); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid rgba(255,255,255,.1); }
+  .gold-text{ background:linear-gradient(120deg,#fbf0d0 0%,#f0d07c 30%,#d9a52e 55%,#f6e2a8 80%,#b9861c 100%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .gold-border{ position:relative; }
+  .gold-border::before{ content:''; position:absolute; inset:0; border-radius:inherit; padding:1.5px; background:linear-gradient(135deg,rgba(240,208,124,.7),rgba(240,208,124,.06) 35%,rgba(139,92,246,.35) 65%,rgba(240,208,124,.55)); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+  .btn-gold{ background:linear-gradient(135deg,#f0d07c,#d9a52e 55%,#b9861c); color:#241a04; font-weight:800; box-shadow:0 10px 30px -8px rgba(217,165,46,.55), inset 0 1px 0 rgba(255,255,255,.5); transition:.25s; position:relative; overflow:hidden; }
+  .btn-gold:hover{ transform:translateY(-2px); box-shadow:0 16px 40px -8px rgba(217,165,46,.7), inset 0 1px 0 rgba(255,255,255,.5); }
+  .btn-gold::after{ content:''; position:absolute; top:0; left:-80%; width:50%; height:100%; background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent); transform:skewX(-20deg); animation:shine 3.2s ease-in-out infinite; }
+  @keyframes shine{ 0%,60%{left:-80%} 100%{left:180%} }
+
+  .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.28rem .8rem; border-radius:99px; font-size:.78rem; font-weight:700; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:#cdd5ea; }
+  .chip-gold{ background:rgba(217,165,46,.12); border-color:rgba(217,165,46,.4); color:#f0d07c; }
+  .chip-violet{ background:rgba(139,92,246,.14); border-color:rgba(139,92,246,.4); color:#c4b5fd; }
+
+  /* ---------- Options ---------- */
+  .opt{ display:flex; align-items:center; gap:1rem; width:100%; text-align:right; padding:1rem 1.15rem; border-radius:1.1rem; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); transition:.22s; cursor:pointer; user-select:none; position:relative; }
+  .opt:hover:not(:disabled){ background:rgba(255,255,255,.08); border-color:rgba(240,208,124,.45); transform:translateY(-2px); box-shadow:0 12px 30px -12px rgba(0,0,0,.6); }
+  .opt:disabled{ cursor:default; }
+  .opt .letter{ flex-shrink:0; width:2.4rem; height:2.4rem; border-radius:.8rem; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk'; font-weight:700; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); color:#f0d07c; transition:.22s; }
+  .opt:hover:not(:disabled) .letter{ background:rgba(217,165,46,.2); border-color:rgba(217,165,46,.5); }
+  .opt-correct{ background:rgba(52,211,153,.13)!important; border-color:rgba(52,211,153,.65)!important; box-shadow:0 0 0 1px rgba(52,211,153,.4), 0 12px 34px -10px rgba(52,211,153,.35)!important; }
+  .opt-correct .letter{ background:rgba(52,211,153,.25)!important; border-color:rgba(52,211,153,.7)!important; color:#6ee7b7!important; }
+  .opt-wrong{ background:rgba(248,113,113,.12)!important; border-color:rgba(248,113,113,.55)!important; animation:shake .5s; opacity:.65; }
+  .opt-wrong .letter{ background:rgba(248,113,113,.22)!important; border-color:rgba(248,113,113,.6)!important; color:#fca5a5!important; }
+  .opt-dim{ opacity:.45; }
+  @keyframes shake{ 10%,90%{transform:translateX(-2px)} 20%,80%{transform:translateX(4px)} 30%,50%,70%{transform:translateX(-7px)} 40%,60%{transform:translateX(7px)} }
+
+  .ar-translation{ display:none; }
+  .show-ar .ar-translation{ display:block; animation:fadeSlide .4s ease; }
+  .show-all-ar .ar-translation{ display:block; }
+  @keyframes fadeSlide{ from{opacity:0; transform:translateY(-6px)} to{opacity:1; transform:translateY(0)} }
+
+  /* ---------- Navigator ---------- */
+  .nav-btn{ aspect-ratio:1; border-radius:.7rem; font-weight:800; font-size:.85rem; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); color:#aeb8d4; transition:.2s; cursor:pointer; }
+  .nav-btn:hover{ border-color:rgba(240,208,124,.5); color:#f0d07c; transform:scale(1.08); }
+  .nav-btn.current{ background:linear-gradient(135deg,#f0d07c,#b9861c); color:#241a04; border-color:transparent; box-shadow:0 0 0 3px rgba(217,165,46,.3), 0 8px 20px -6px rgba(217,165,46,.6); }
+  .nav-btn.ok{ background:rgba(52,211,153,.18); border-color:rgba(52,211,153,.55); color:#6ee7b7; }
+  .nav-btn.mid{ background:rgba(251,191,36,.16); border-color:rgba(251,191,36,.55); color:#fcd34d; }
+
+  /* ---------- Celebration ---------- */
+  .ck-circle{ fill:none; stroke:#34d399; stroke-width:3; stroke-dasharray:160; stroke-dashoffset:160; animation:draw .7s ease forwards; }
+  .ck-check{ fill:none; stroke:#34d399; stroke-width:4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:60; stroke-dashoffset:60; animation:draw .5s .5s ease forwards; }
+  @keyframes draw{ to{stroke-dashoffset:0} }
+  .pop{ animation:popIn .45s cubic-bezier(.34,1.56,.64,1) both; }
+  @keyframes popIn{ 0%{transform:scale(.5); opacity:0} 100%{transform:scale(1); opacity:1} }
+  .ring-spin{ animation:spinSlow 14s linear infinite; }
+  @keyframes spinSlow{ to{transform:rotate(360deg)} }
+  .float-slow{ animation:floatY 5s ease-in-out infinite; }
+  @keyframes floatY{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+
+  /* ---------- Report ---------- */
+  .rep-item{ border-radius:1.1rem; padding:1.1rem 1.2rem; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.09); transition:.25s; }
+  .rep-item:hover{ background:rgba(255,255,255,.06); border-color:rgba(240,208,124,.3); }
+  .st-ok{ background:rgba(52,211,153,.14); border:1px solid rgba(52,211,153,.4); color:#6ee7b7; }
+  .st-mid{ background:rgba(251,191,36,.13); border:1px solid rgba(251,191,36,.4); color:#fcd34d; }
+  .st-un{ background:rgba(148,163,184,.13); border:1px solid rgba(148,163,184,.35); color:#cbd5e1; }
+  .tab-btn{ padding:.5rem 1.2rem; border-radius:99px; font-weight:700; font-size:.85rem; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); color:#aeb8d4; transition:.2s; }
+  .tab-btn.active{ background:linear-gradient(135deg,#f0d07c,#b9861c); color:#241a04; border-color:transparent; }
+
+  .score-ring{ transition:stroke-dashoffset 1.6s cubic-bezier(.22,1,.36,1); }
+  .toast{ position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(120%); z-index:200; transition:transform .45s cubic-bezier(.34,1.4,.64,1); }
+  .toast.show{ transform:translateX(-50%) translateY(0); }
+  .banner-wrong{ animation:fadeSlide .35s ease; }
+  .drawer{ transition:transform .4s cubic-bezier(.22,1,.36,1); }
+  @media (max-width:1023px){ .drawer{ transform:translateX(105%);} .drawer.open{ transform:translateX(0);} }
+  .pulse-dot{ animation:pdot 1.6s ease-in-out infinite; }
+  @keyframes pdot{ 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.4; transform:scale(.75)} }
+</style>
+</head>
+<body class="min-h-screen">
+
+<div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="grid-overlay"></div>
+<canvas id="bgParticles"></canvas>
+
+<!-- ============ WELCOME SCREEN ============ -->
+<section id="welcomeScreen" class="min-h-screen flex items-center justify-center px-4 py-10">
+  <div class="max-w-3xl w-full text-center">
+    <div id="wBadge" class="inline-flex items-center gap-2 chip chip-gold mb-6">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+      مراجعة تفاعلية — استعداداً للكويز
+    </div>
+    <h1 id="wTitle" class="text-4xl md:text-6xl font-black leading-tight mb-3">
+      <span class="gold-text">Big Data Analytics</span>
+    </h1>
+    <p id="wSub" class="text-lg md:text-2xl text-slate-300 font-bold mb-2" dir="ltr">Introduction to Big Data Analytics — Part 2 Review</p>
+    <p class="text-slate-400 mb-8">الأدوار في النظام البيئي للبيانات الضخمة • دور عالم البيانات • الخصائص الخمس لعالم البيانات</p>
+
+    <div id="wCard" class="glass-strong gold-border rounded-3xl p-7 md:p-9 mb-8 relative overflow-hidden">
+      <div class="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-gold-500/10 blur-3xl"></div>
+      <div class="flex flex-col md:flex-row items-center justify-center gap-5 md:gap-8">
+        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-gold-300 to-gold-700 flex items-center justify-center shadow-lg shadow-gold-600/40 float-slow">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#241a04" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="text-center md:text-right">
+          <p class="text-slate-400 text-sm font-bold mb-1">أهلاً بك يا بطل</p>
+          <h2 class="text-3xl md:text-4xl font-black gold-text">عبدالله العبيدي</h2>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3 mt-8">
+        <div class="glass rounded-2xl py-4 px-2"><div class="text-2xl md:text-3xl font-black gold-text" dir="ltr">50</div><div class="text-xs text-slate-400 font-bold mt-1">سؤالاً تفاعلياً</div></div>
+        <div class="glass rounded-2xl py-4 px-2"><div class="text-2xl md:text-3xl font-black gold-text" dir="ltr">25 + 25</div><div class="text-xs text-slate-400 font-bold mt-1">صح/خطأ + اختيارات</div></div>
+        <div class="glass rounded-2xl py-4 px-2"><div class="text-2xl md:text-3xl font-black gold-text">فوري</div><div class="text-xs text-slate-400 font-bold mt-1">تصحيح واحتفال</div></div>
+      </div>
+    </div>
+
+    <button id="startBtn" class="btn-gold text-xl md:text-2xl px-12 py-4 rounded-2xl inline-flex items-center gap-3">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      ابدأ المراجعة يا بطل
+    </button>
+    <p class="text-slate-500 text-sm mt-5">أجب على كل سؤال — إجابة صحيحة = احتفال، إجابة خاطئة = حاول مرة أخرى</p>
+  </div>
+</section>
+
+<!-- ============ QUIZ SCREEN ============ -->
+<section id="quizScreen" class="hidden min-h-screen">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 glass-strong border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-300 to-gold-700 flex items-center justify-center shadow-md shadow-gold-600/40">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#241a04" stroke-width="2.4" stroke-linecap="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg>
+        </div>
+        <div>
+          <div class="font-black text-sm md:text-base leading-tight">مراجعة <span class="gold-text">Big Data Analytics</span></div>
+          <div class="text-[11px] text-slate-400 font-bold">عبدالله العبيدي</div>
+        </div>
+      </div>
+      <div class="flex-1"></div>
+      <div class="hidden sm:flex items-center gap-2">
+        <span class="chip"><span class="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span> تمت الإجابة: <b id="hdrAnswered" class="text-white">0</b>/50</span>
+        <span class="chip chip-gold">صحيحة من أول مرة: <b id="hdrCorrect" class="text-gold-300">0</b></span>
+      </div>
+      <button id="soundBtn" class="w-10 h-10 rounded-xl glass flex items-center justify-center hover:border-gold-400/50 transition" title="الصوت">
+        <svg id="soundOnIco" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f0d07c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        <svg id="soundOffIco" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      </button>
+    </div>
+    <div class="h-1 bg-white/5"><div id="hdrProgress" class="h-full bg-gradient-to-l from-gold-300 to-gold-600 transition-all duration-500" style="width:0%"></div></div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 py-6 lg:py-8 flex gap-6 items-start">
+    <!-- Navigator (desktop aside / mobile drawer) -->
+    <aside id="navigator" class="drawer fixed lg:sticky top-0 lg:top-24 right-0 z-50 lg:z-10 h-full lg:h-auto w-[85vw] max-w-sm lg:w-80 flex-shrink-0 glass-strong lg:glass lg:rounded-3xl p-5 overflow-y-auto max-h-screen lg:max-h-[calc(100vh-7rem)]">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-black text-lg gold-text">متتبع الأسئلة</h3>
+        <button id="navClose" class="lg:hidden w-8 h-8 rounded-lg glass flex items-center justify-center text-slate-300">✕</button>
+      </div>
+      <div class="flex items-center justify-between text-xs font-bold text-slate-400 mb-2">
+        <span>التقدم</span><span id="navProgText">0 / 50</span>
+      </div>
+      <div class="h-2 rounded-full bg-white/5 mb-5 overflow-hidden"><div id="navProgress" class="h-full bg-gradient-to-l from-gold-300 to-gold-600 transition-all duration-500" style="width:0%"></div></div>
+
+      <p class="text-[11px] font-black text-violet-300 mb-2 tracking-wide">القسم الأول — صح / خطأ</p>
+      <div id="navGrid1" class="grid grid-cols-5 gap-2 mb-5"></div>
+      <p class="text-[11px] font-black text-violet-300 mb-2 tracking-wide">القسم الثاني — اختيار من متعدد</p>
+      <div id="navGrid2" class="grid grid-cols-5 gap-2 mb-5"></div>
+
+      <div class="glass rounded-2xl p-3 mb-4 text-[11px] font-bold space-y-2">
+        <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-gradient-to-br from-gold-300 to-gold-600 inline-block"></span> السؤال الحالي</div>
+        <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-emerald-400/25 border border-emerald-400/60 inline-block"></span> صحيحة من أول محاولة</div>
+        <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-amber-400/20 border border-amber-400/60 inline-block"></span> صحيحة بعد محاولات</div>
+        <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded bg-white/10 border border-white/20 inline-block"></span> لم تتم الإجابة</div>
+      </div>
+
+      <label class="flex items-center justify-between glass rounded-2xl p-3 mb-4 cursor-pointer">
+        <span class="text-xs font-black text-slate-300">إظهار كل الترجمات</span>
+        <input type="checkbox" id="translateAll" class="accent-amber-500 w-4 h-4">
+      </label>
+
+      <button id="finishBtn" class="btn-gold w-full py-3.5 rounded-2xl flex items-center justify-center gap-2 text-base">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+        إنهاء المراجعة وعرض التقرير
+      </button>
+    </aside>
+    <div id="drawerBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden lg:hidden"></div>
+
+    <!-- Question area -->
+    <main class="flex-1 min-w-0 pb-24 lg:pb-8">
+      <div id="qCard" class="glass-strong gold-border rounded-3xl p-6 md:p-9 relative overflow-hidden"></div>
+    </main>
+  </div>
+
+  <!-- Mobile nav toggle -->
+  <button id="navToggle" class="lg:hidden fixed bottom-5 left-5 z-40 btn-gold w-14 h-14 rounded-2xl flex items-center justify-center">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+  </button>
+</section>
+
+<!-- ============ CELEBRATION OVERLAY ============ -->
+<div id="celebration" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+  <div class="glass-strong gold-border rounded-3xl max-w-md w-full p-8 text-center pop relative overflow-hidden">
+    <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-emerald-400/15 blur-3xl"></div>
+    <div class="relative w-28 h-28 mx-auto mb-5">
+      <div class="absolute inset-0 rounded-full border-2 border-dashed border-gold-400/50 ring-spin"></div>
+      <div class="absolute inset-2 rounded-full bg-emerald-400/10 flex items-center justify-center">
+        <svg width="64" height="64" viewBox="0 0 52 52"><circle class="ck-circle" cx="26" cy="26" r="24"/><path class="ck-check" d="M14 27l8 8 16-16"/></svg>
+      </div>
+    </div>
+    <h2 class="text-4xl font-black gold-text mb-2">أحسنت عبدالله!</h2>
+    <p id="celebSub" class="text-xl font-bold text-emerald-300 mb-1">كمل يا بطل!</p>
+    <p class="text-sm text-slate-400 mb-7">إجابة صحيحة — أنت تقترب من إتقان الشابتر</p>
+    <button id="celebNext" class="btn-gold w-full py-3.5 rounded-2xl text-lg flex items-center justify-center gap-2">
+      السؤال التالي
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ============ CONFIRM MODAL ============ -->
+<div id="confirmModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
+  <div class="glass-strong gold-border rounded-3xl max-w-sm w-full p-7 text-center pop">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-400/15 border border-amber-400/40 flex items-center justify-center">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="2.2" stroke-linecap="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+    </div>
+    <h3 class="text-xl font-black mb-2">لم تُجب على جميع الأسئلة</h3>
+    <p class="text-slate-400 text-sm mb-6">لديك <b id="confirmUn" class="text-amber-300">0</b> سؤال بدون إجابة. هل تريد إنهاء المراجعة وعرض التقرير؟</p>
+    <div class="flex gap-3">
+      <button id="confirmYes" class="btn-gold flex-1 py-3 rounded-xl">نعم، اعرض التقرير</button>
+      <button id="confirmNo" class="flex-1 py-3 rounded-xl glass font-bold hover:border-white/30 transition">أكمل الإجابة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ RESULTS SCREEN ============ -->
+<section id="resultsScreen" class="hidden min-h-screen py-10 px-4">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-10">
+      <div class="inline-flex w-20 h-20 rounded-3xl bg-gradient-to-br from-gold-300 to-gold-700 items-center justify-center shadow-xl shadow-gold-600/40 mb-4 float-slow">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#241a04" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h3"/><path d="M17 6h3a2 2 0 0 1 0 4h-3"/></svg>
+      </div>
+      <h1 class="text-3xl md:text-5xl font-black mb-2">تقرير أداء <span class="gold-text">عبدالله العبيدي</span></h1>
+      <p class="text-slate-400 font-bold" dir="ltr">Introduction to Big Data Analytics — Part 2</p>
+    </div>
+
+    <div class="glass-strong gold-border rounded-3xl p-7 md:p-10 mb-8 flex flex-col md:flex-row items-center gap-8">
+      <div class="relative w-48 h-48 flex-shrink-0">
+        <svg class="w-full h-full -rotate-90" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="84" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="14"/>
+          <circle id="scoreRing" class="score-ring" cx="100" cy="100" r="84" fill="none" stroke="url(#gGold)" stroke-width="14" stroke-linecap="round" stroke-dasharray="527.8" stroke-dashoffset="527.8"/>
+          <defs><linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f0d07c"/><stop offset="100%" stop-color="#b9861c"/></linearGradient></defs>
+        </svg>
+        <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <div id="scorePct" class="text-5xl font-black gold-text" dir="ltr">0%</div>
+          <div id="scoreFrac" class="text-sm font-bold text-slate-400 mt-1" dir="ltr">0 / 50</div>
+        </div>
+      </div>
+      <div class="flex-1 text-center md:text-right">
+        <h2 id="gradeMsg" class="text-2xl md:text-3xl font-black gold-text mb-3"></h2>
+        <p id="gradeSub" class="text-slate-300 mb-6"></p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="glass rounded-2xl p-3"><div id="stFirst" class="text-2xl font-black text-emerald-300" dir="ltr">0</div><div class="text-[11px] font-bold text-slate-400 mt-1">صحيحة من أول محاولة</div></div>
+          <div class="glass rounded-2xl p-3"><div id="stRetry" class="text-2xl font-black text-amber-300" dir="ltr">0</div><div class="text-[11px] font-bold text-slate-400 mt-1">صحيحة بعد محاولات</div></div>
+          <div class="glass rounded-2xl p-3"><div id="stUn" class="text-2xl font-black text-slate-300" dir="ltr">0</div><div class="text-[11px] font-bold text-slate-400 mt-1">بدون إجابة</div></div>
+          <div class="glass rounded-2xl p-3"><div id="stAtt" class="text-2xl font-black text-violet-300" dir="ltr">0</div><div class="text-[11px] font-bold text-slate-400 mt-1">إجمالي المحاولات</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 mb-10">
+      <button id="waBtn" class="flex-1 py-4 rounded-2xl font-black text-lg flex items-center justify-center gap-3 text-white transition hover:-translate-y-0.5" style="background:linear-gradient(135deg,#25D366,#128C7E); box-shadow:0 12px 32px -10px rgba(37,211,102,.5);">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.5 0 1.47 1.07 2.9 1.22 3.1.15.2 2.1 3.2 5.1 4.49.71.31 1.27.49 1.7.63.72.23 1.37.2 1.88.12.57-.09 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35M12.04 2C6.56 2 2.1 6.45 2.1 11.93c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22c5.48 0 9.93-4.45 9.93-9.93 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2"/></svg>
+        إرسال الإجابات عالواتساب للدكتور محمد
+      </button>
+      <button id="restartBtn" class="sm:w-56 py-4 rounded-2xl glass font-black text-lg flex items-center justify-center gap-2 hover:border-gold-400/50 transition">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f0d07c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.5 15a9 9 0 1 0 2.1-9.4L1 10"/></svg>
+        إعادة المراجعة
+      </button>
+    </div>
+
+    <div class="flex items-center gap-2 mb-5 flex-wrap">
+      <button class="tab-btn active" data-filter="all">كل الأسئلة</button>
+      <button class="tab-btn" data-filter="ok">صحيحة من أول محاولة</button>
+      <button class="tab-btn" data-filter="mid">احتاجت محاولات</button>
+      <button class="tab-btn" data-filter="un">بدون إجابة</button>
+    </div>
+
+    <div id="reportList"></div>
+    <p class="text-center text-slate-500 text-sm mt-10">بالتوفيق في الكويز يا عبدالله — أنت بطل</p>
+  </div>
+</section>
+
+<!-- Toast -->
+<div id="toast" class="toast glass-strong gold-border rounded-2xl px-6 py-3.5 font-bold text-sm text-gold-200 shadow-2xl"></div>
+
+<script>
+/* ==================== DATA ==================== */
+const QUESTIONS = [
+/* ---- Part 1 : True / False ---- */
+{id:1,part:1,page:3,type:'tf',q:'The new data ecosystem driven by Big Data requires three archetypical roles.',qAr:'النظام البيئي الجديد للبيانات المدفوع بالبيانات الضخمة يتطلب ثلاثة أدوار نموذجية.',answer:true},
+{id:2,part:1,page:3,type:'tf',q:'Deep Analytical Talent requires strong analytical skills.',qAr:'المواهب التحليلية العميقة (Deep Analytical Talent) تتطلب مهارات تحليلية قوية.',answer:true},
+{id:3,part:1,page:3,type:'tf',q:'Deep Analytical Talent only works with structured data.',qAr:'المواهب التحليلية العميقة تعمل فقط مع البيانات المهيكلة.',answer:false},
+{id:4,part:1,page:3,type:'tf',q:'Data Scientists are listed as an example of Deep Analytical Talent.',qAr:'يُذكر علماء البيانات كمثال على المواهب التحليلية العميقة.',answer:true},
+{id:5,part:1,page:3,type:'tf',q:'Statisticians are examples of Data Savvy Professionals.',qAr:'الإحصائيون هم أمثلة على المحترفين الملمّين بالبيانات (Data Savvy Professionals).',answer:false},
+{id:6,part:1,page:3,type:'tf',q:'Financial Analysts are examples of Data Savvy Professionals.',qAr:'المحللون الماليون هم أمثلة على المحترفين الملمّين بالبيانات.',answer:true},
+{id:7,part:1,page:3,type:'tf',q:'Operations Managers are included among Data Savvy Professionals.',qAr:'مديرو العمليات مشمولون ضمن المحترفين الملمّين بالبيانات.',answer:true},
+{id:8,part:1,page:3,type:'tf',q:'Computer programmers are examples of Technology & Data Enablers.',qAr:'مبرمجو الحاسوب هم أمثلة على ممكّني التقنية والبيانات (Technology & Data Enablers).',answer:true},
+{id:9,part:1,page:3,type:'tf',q:'Database administrators are included in Technology & Data Enablers.',qAr:'مسؤولو قواعد البيانات مشمولون ضمن ممكّني التقنية والبيانات.',answer:true},
+{id:10,part:1,page:3,type:'tf',q:'Mathematicians are listed as an example of Deep Analytical Talent.',qAr:'يُذكر علماء الرياضيات كمثال على المواهب التحليلية العميقة.',answer:true},
+{id:11,part:1,page:3,type:'tf',q:'Deep Analytical Talent needs access to a magnetic, analytic sandbox.',qAr:'المواهب التحليلية العميقة تحتاج إلى الوصول إلى بيئة اختبار تحليلية جذابة (Magnetic Analytic Sandbox).',answer:true},
+{id:12,part:1,page:3,type:'tf',q:'Data Savvy Professionals include Business and Functional Managers.',qAr:'يشمل المحترفون الملمّون بالبيانات مديري الأعمال والمديرين الوظيفيين.',answer:true},
+{id:13,part:1,page:3,type:'tf',q:'Computer system analysts are listed as Technology & Data Enablers.',qAr:'يُدرج محللو أنظمة الحاسوب ضمن ممكّني التقنية والبيانات.',answer:true},
+{id:14,part:1,page:4,type:'tf',q:'The Data Scientist combines several skill sets that were previously separated into different roles.',qAr:'يجمع عالم البيانات عدة مجموعات من المهارات كانت موزعة سابقاً على أدوار مختلفة.',answer:true},
+{id:15,part:1,page:4,type:'tf',q:'The Data Scientist is responsible only for the technical aspects of an analytical project.',qAr:'عالم البيانات مسؤول فقط عن الجوانب التقنية في المشروع التحليلي.',answer:false},
+{id:16,part:1,page:4,type:'tf',q:'The Data Scientist helps provide continuity throughout the analytical process.',qAr:'يساعد عالم البيانات في توفير الاستمرارية طوال العملية التحليلية.',answer:true},
+{id:17,part:1,page:4,type:'tf',q:'The Data Scientist role can include consultative aspects of the discovery phase.',qAr:'يمكن أن يشمل دور عالم البيانات الجوانب الاستشارية لمرحلة الاستكشاف.',answer:true},
+{id:18,part:1,page:4,type:'tf',q:'The Data Scientist can combine technical and quantitative expertise.',qAr:'يمكن لعالم البيانات أن يجمع بين الخبرة التقنية والخبرة الكمية.',answer:true},
+{id:19,part:1,page:5,type:'tf',q:'Quantitative skills are one of the five main competency and behavioral characteristics for Data Scientists.',qAr:'المهارات الكمية هي واحدة من الخصائص الخمس الرئيسية (كفاءات وسلوكيات) لعلماء البيانات.',answer:true},
+{id:20,part:1,page:5,type:'tf',q:'Software engineering, machine learning, and programming skills are examples of technical aptitude.',qAr:'هندسة البرمجيات وتعلم الآلة ومهارات البرمجة هي أمثلة على الاستعداد التقني (Technical Aptitude).',answer:true},
+{id:21,part:1,page:5,type:'tf',q:'A Data Scientist should examine work critically rather than in a one-sided way.',qAr:'يجب على عالم البيانات أن يفحص العمل بشكل نقدي بدلاً من النظر إليه من جانب واحد.',answer:true},
+{id:22,part:1,page:5,type:'tf',q:'Being curious and creative is one of the characteristics of Data Scientists.',qAr:'الفضول والإبداع من خصائص علماء البيانات.',answer:true},
+{id:23,part:1,page:5,type:'tf',q:'Data Scientists must be passionate about data and finding creative ways to solve problems.',qAr:'يجب أن يكون علماء البيانات شغوفين بالبيانات وبإيجاد طرق إبداعية لحل المشكلات.',answer:true},
+{id:24,part:1,page:5,type:'tf',q:'Strong quantitative skills alone are enough to make a project resonate.',qAr:'المهارات الكمية القوية وحدها كافية لجعل المشروع مؤثراً وملهماً.',answer:false},
+{id:25,part:1,page:5,type:'tf',q:'Data Scientists should be able to articulate business value clearly and work collaboratively with project sponsors and key stakeholders.',qAr:'يجب أن يكون علماء البيانات قادرين على توضيح قيمة العمل بوضوح والعمل بتعاون مع رعاة المشروع وأصحاب المصلحة الرئيسيين.',answer:true},
+/* ---- Part 2 : MCQ ---- */
+{id:26,part:2,page:3,type:'mcq',q:'How many archetypical roles are required by the new data ecosystem?',qAr:'كم عدد الأدوار النموذجية التي يتطلبها النظام البيئي الجديد للبيانات؟',options:[{t:'Two',ar:'اثنان'},{t:'Three',ar:'ثلاثة'},{t:'Four',ar:'أربعة'},{t:'Five',ar:'خمسة'}],answer:1},
+{id:27,part:2,page:3,type:'mcq',q:'Which role requires strong analytical skills?',qAr:'أي دور يتطلب مهارات تحليلية قوية؟',options:[{t:'Data Savvy Professionals',ar:'المحترفون الملمّون بالبيانات'},{t:'Technology & Data Enablers',ar:'ممكّنو التقنية والبيانات'},{t:'Deep Analytical Talent',ar:'المواهب التحليلية العميقة'},{t:'Business and Functional Managers',ar:'مديرو الأعمال والمديرون الوظيفيون'}],answer:2},
+{id:28,part:2,page:3,type:'mcq',q:'Which role handles raw data, unstructured data, and complex analytical techniques at massive scales?',qAr:'أي دور يتعامل مع البيانات الخام والبيانات غير المهيكلة والتقنيات التحليلية المعقدة على نطاقات ضخمة؟',options:[{t:'Data Savvy Professionals',ar:'المحترفون الملمّون بالبيانات'},{t:'Deep Analytical Talent',ar:'المواهب التحليلية العميقة'},{t:'Technology & Data Enablers',ar:'ممكّنو التقنية والبيانات'},{t:'Financial Analysts',ar:'المحللون الماليون'}],answer:1},
+{id:29,part:2,page:3,type:'mcq',q:'Which profession is an example of Deep Analytical Talent?',qAr:'أي مهنة تُعد مثالاً على المواهب التحليلية العميقة؟',options:[{t:'Financial Analyst',ar:'محلل مالي'},{t:'Computer Programmer',ar:'مبرمج حاسوب'},{t:'Data Scientist',ar:'عالم بيانات'},{t:'Database Administrator',ar:'مسؤول قاعدة بيانات'}],answer:2},
+{id:30,part:2,page:3,type:'mcq',q:'Which profession is listed under Data Savvy Professionals?',qAr:'أي مهنة مدرجة ضمن المحترفين الملمّين بالبيانات؟',options:[{t:'Statistician',ar:'إحصائي'},{t:'Financial Analyst',ar:'محلل مالي'},{t:'Mathematician',ar:'عالم رياضيات'},{t:'Computer Programmer',ar:'مبرمج حاسوب'}],answer:1},
+{id:31,part:2,page:3,type:'mcq',q:'Which of the following is a Data Savvy Professional?',qAr:'أي مما يلي يُعد من المحترفين الملمّين بالبيانات؟',options:[{t:'Operations Manager',ar:'مدير عمليات'},{t:'Database Administrator',ar:'مسؤول قاعدة بيانات'},{t:'Computer System Analyst',ar:'محلل أنظمة حاسوب'},{t:'Mathematician',ar:'عالم رياضيات'}],answer:0},
+{id:32,part:2,page:3,type:'mcq',q:'Which profession belongs to Technology & Data Enablers?',qAr:'أي مهنة تنتمي إلى ممكّني التقنية والبيانات؟',options:[{t:'Life Scientist',ar:'عالم في علوم الحياة'},{t:'Economist',ar:'خبير اقتصادي'},{t:'Computer Programmer',ar:'مبرمج حاسوب'},{t:'Market Research Analyst',ar:'محلل أبحاث السوق'}],answer:2},
+{id:33,part:2,page:3,type:'mcq',q:'Which of the following is included in Technology & Data Enablers?',qAr:'أي مما يلي مشمول في ممكّني التقنية والبيانات؟',options:[{t:'Database Administrators',ar:'مسؤولو قواعد البيانات'},{t:'Data Scientists',ar:'علماء البيانات'},{t:'Economists',ar:'خبراء الاقتصاد'},{t:'Operations Managers',ar:'مديرو العمليات'}],answer:0},
+{id:34,part:2,page:3,type:'mcq',q:'Which of the following is an example of Deep Analytical Talent?',qAr:'أي مما يلي مثال على المواهب التحليلية العميقة؟',options:[{t:'Business and Functional Manager',ar:'مدير أعمال / مدير وظيفي'},{t:'Market Research Analyst',ar:'محلل أبحاث السوق'},{t:'Economist',ar:'خبير اقتصادي'},{t:'Computer System Analyst',ar:'محلل أنظمة حاسوب'}],answer:2},
+{id:35,part:2,page:3,type:'mcq',q:'Deep Analytical Talent needs access to which environment?',qAr:'المواهب التحليلية العميقة تحتاج إلى الوصول إلى أي بيئة؟',options:[{t:'Data warehouse',ar:'مستودع البيانات'},{t:'Magnetic, analytic sandbox',ar:'بيئة اختبار تحليلية جذابة (Sandbox)'},{t:'Business Intelligence system',ar:'نظام ذكاء الأعمال'},{t:'OLAP cube',ar:'مكعب OLAP'}],answer:1},
+{id:36,part:2,page:3,type:'mcq',q:'Which group includes Life Scientists?',qAr:'أي مجموعة تشمل علماء علوم الحياة؟',options:[{t:'Deep Analytical Talent',ar:'المواهب التحليلية العميقة'},{t:'Data Savvy Professionals',ar:'المحترفون الملمّون بالبيانات'},{t:'Technology & Data Enablers',ar:'ممكّنو التقنية والبيانات'},{t:'Computer System Analysts',ar:'محللو أنظمة الحاسوب'}],answer:1},
+{id:37,part:2,page:3,type:'mcq',q:'Which group includes Market Research Analysts?',qAr:'أي مجموعة تشمل محللي أبحاث السوق؟',options:[{t:'Data Savvy Professionals',ar:'المحترفون الملمّون بالبيانات'},{t:'Deep Analytical Talent',ar:'المواهب التحليلية العميقة'},{t:'Technology & Data Enablers',ar:'ممكّنو التقنية والبيانات'},{t:'Data Scientists',ar:'علماء البيانات'}],answer:0},
+{id:38,part:2,page:4,type:'mcq',q:'What does the Data Scientist role combine?',qAr:'ماذا يجمع دور عالم البيانات؟',options:[{t:'Only programming skills',ar:'مهارات البرمجة فقط'},{t:'Several skill sets previously separated into different roles',ar:'عدة مجموعات مهارات كانت موزعة سابقاً على أدوار مختلفة'},{t:'Only quantitative expertise',ar:'الخبرة الكمية فقط'},{t:'Only business skills',ar:'مهارات الأعمال فقط'}],answer:1},
+{id:39,part:2,page:4,type:'mcq',q:'What does the Data Scientist help provide throughout the analytical process?',qAr:'ماذا يساعد عالم البيانات في توفيره طوال العملية التحليلية؟',options:[{t:'Data storage',ar:'تخزين البيانات'},{t:'Continuity',ar:'الاستمرارية'},{t:'Hardware maintenance',ar:'صيانة الأجهزة'},{t:'Financial reporting',ar:'إعداد التقارير المالية'}],answer:1},
+{id:40,part:2,page:4,type:'mcq',q:'Which aspect of a project may be part of the Data Scientist role?',qAr:'أي جانب من جوانب المشروع قد يكون جزءاً من دور عالم البيانات؟',options:[{t:'Consultative aspects of the discovery phase',ar:'الجوانب الاستشارية لمرحلة الاستكشاف'},{t:'Only database administration',ar:'إدارة قواعد البيانات فقط'},{t:'Only end-user training',ar:'تدريب المستخدم النهائي فقط'},{t:'Only software installation',ar:'تثبيت البرمجيات فقط'}],answer:0},
+{id:41,part:2,page:4,type:'mcq',q:'Which type of expertise is specifically mentioned as part of the Data Scientist role?',qAr:'أي نوع من الخبرة مذكور تحديداً كجزء من دور عالم البيانات؟',options:[{t:'Technical and quantitative expertise',ar:'الخبرة التقنية والكمية'},{t:'Financial and legal expertise',ar:'الخبرة المالية والقانونية'},{t:'Marketing and sales expertise',ar:'خبرة التسويق والمبيعات'},{t:'Hardware and networking expertise',ar:'خبرة الأجهزة والشبكات'}],answer:0},
+{id:42,part:2,page:5,type:'mcq',q:'How many main competency and behavioral characteristics are identified for Data Scientists?',qAr:'كم عدد الخصائص الرئيسية (كفاءات وسلوكيات) المحددة لعلماء البيانات؟',options:[{t:'Three',ar:'ثلاثة'},{t:'Four',ar:'أربعة'},{t:'Five',ar:'خمسة'},{t:'Six',ar:'ستة'}],answer:2},
+{id:43,part:2,page:5,type:'mcq',q:'Which of the following is a quantitative skill?',qAr:'أي مما يلي يُعد مهارة كمية؟',options:[{t:'Mathematics or statistics',ar:'الرياضيات أو الإحصاء'},{t:'Software engineering',ar:'هندسة البرمجيات'},{t:'Programming',ar:'البرمجة'},{t:'Machine learning',ar:'تعلم الآلة'}],answer:0},
+{id:44,part:2,page:5,type:'mcq',q:'Which of the following is an example of technical aptitude?',qAr:'أي مما يلي مثال على الاستعداد التقني؟',options:[{t:'Curiosity',ar:'الفضول'},{t:'Creativity',ar:'الإبداع'},{t:'Statistics',ar:'الإحصاء'},{t:'Programming skills',ar:'مهارات البرمجة'}],answer:3},
+{id:45,part:2,page:5,type:'mcq',q:'Why is being skeptical important for a Data Scientist?',qAr:'لماذا يُعد التشكك (Skeptical) مهماً لعالم البيانات؟',options:[{t:'To avoid using data',ar:'لتجنب استخدام البيانات'},{t:'To examine work critically',ar:'لفحص العمل بشكل نقدي'},{t:'To replace technical skills',ar:'لاستبدال المهارات التقنية'},{t:'To focus only on business value',ar:'للتركيز فقط على قيمة العمل'}],answer:1},
+{id:46,part:2,page:5,type:'mcq',q:'Which characteristic requires passion for data?',qAr:'أي خاصية تتطلب الشغف بالبيانات؟',options:[{t:'Quantitative',ar:'الكمّية'},{t:'Technical aptitude',ar:'الاستعداد التقني'},{t:'Curious & Creative',ar:'الفضول والإبداع'},{t:'Communicative & Collaborative',ar:'التواصل والتعاون'}],answer:2},
+{id:47,part:2,page:5,type:'mcq',q:'What must Data Scientists be able to find creative ways to do?',qAr:'ما الذي يجب أن يكون علماء البيانات قادرين على إيجاد طرق إبداعية للقيام به؟',options:[{t:'Store data',ar:'تخزين البيانات'},{t:'Solve problems and portray information',ar:'حل المشكلات وعرض المعلومات'},{t:'Manage databases',ar:'إدارة قواعد البيانات'},{t:'Build networks',ar:'بناء الشبكات'}],answer:1},
+{id:48,part:2,page:5,type:'mcq',q:'What should a Data Scientist be able to articulate clearly?',qAr:'ما الذي يجب أن يكون عالم البيانات قادراً على توضيحه بوضوح؟',options:[{t:'Database structure',ar:'هيكل قاعدة البيانات'},{t:'Business value',ar:'قيمة العمل'},{t:'Programming syntax',ar:'صياغة لغة البرمجة'},{t:'Software architecture',ar:'معمارية البرمجيات'}],answer:1},
+{id:49,part:2,page:5,type:'mcq',q:'With whom should Data Scientists work collaboratively?',qAr:'مع من يجب أن يعمل علماء البيانات بشكل تعاوني؟',options:[{t:'Project sponsors and key stakeholders',ar:'رعاة المشروع وأصحاب المصلحة الرئيسيون'},{t:'Only database administrators',ar:'مسؤولو قواعد البيانات فقط'},{t:'Only computer programmers',ar:'مبرمجو الحاسوب فقط'},{t:'Only financial analysts',ar:'المحللون الماليون فقط'}],answer:0},
+{id:50,part:2,page:5,type:'mcq',q:'Which combination best represents the characteristics of a Data Scientist?',qAr:'أي مجموعة تمثل خصائص عالم البيانات بشكل أفضل؟',options:[{t:'Quantitative, technical, skeptical, curious & creative, communicative & collaborative',ar:'كمّية، تقنية، متشككة، فضولية ومبدعة، تواصلية وتعاونية'},{t:'Financial, operational, legal, technical, administrative',ar:'مالية، تشغيلية، قانونية، تقنية، إدارية'},{t:'Programming, networking, hardware, security, accounting',ar:'برمجة، شبكات، أجهزة، أمن، محاسبة'},{t:'Reporting, storage, backup, failover, normalization',ar:'تقارير، تخزين، نسخ احتياطي، تجاوز أعطال، تطبيع'}],answer:0}
+];
+
+const LETTERS = ['A','B','C','D'];
+const SUCCESS_SUBS = ['كمل يا بطل!','أنت نجم ساطع!','إجابة عبقرية!','واصل التألق يا بطل!','مستوى خرافي يا عبدالله!','عقلية عالم بيانات حقيقي!'];
+const WRONG_MSGS = ['حاول مرة أخرى يا عبدالله — أنت تقدر!','ليست الإجابة الصحيحة، ركّز وحاول مجدداً!','قريب! فكّر في الفكرة الأساسية وحاول مرة أخرى','لا بأس يا بطل، الخطأ أول خطوة للإتقان — حاول مجدداً'];
+
+/* ==================== STATE ==================== */
+const state = { current:0, answers:{}, translated:new Set(), sound:true, finished:false };
+
+/* ==================== AUDIO ==================== */
+const FX = {
+  ctx:null,
+  init(){ if(!this.ctx){ try{ this.ctx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } if(this.ctx && this.ctx.state==='suspended') this.ctx.resume(); },
+  tone(f,t,d,type,v){ if(!state.sound||!this.ctx) return; type=type||'sine'; v=v||0.16;
+    const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+    o.type=type; o.frequency.value=f;
+    const now=this.ctx.currentTime;
+    g.gain.setValueAtTime(0.0001, now+t);
+    g.gain.exponentialRampToValueAtTime(v, now+t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, now+t+d);
+    o.connect(g); g.connect(this.ctx.destination);
+    o.start(now+t); o.stop(now+t+d+0.05);
+  },
+  click(){ this.tone(720,0,0.07,'triangle',0.07); },
+  success(){ const n=[523.25,659.25,783.99,1046.5]; n.forEach((f,i)=>this.tone(f,i*0.09,0.35,'triangle',0.15)); this.tone(1318.5,0.38,0.55,'sine',0.1); },
+  error(){ this.tone(210,0,0.22,'sawtooth',0.09); this.tone(150,0.13,0.32,'sawtooth',0.09); },
+  fanfare(){ const n=[392,523.25,659.25,783.99,1046.5,1318.5]; n.forEach((f,i)=>this.tone(f,i*0.12,0.5,'triangle',0.14)); }
+};
+
+/* ==================== HELPERS ==================== */
+const $ = id => document.getElementById(id);
+function ansText(q){ if(q.type==='tf') return q.answer ? 'True (صح)' : 'False (خطأ)'; const o=q.options[q.answer]; return LETTERS[q.answer]+'. '+o.t+' — '+o.ar; }
+function choiceText(q,val){ if(q.type==='tf') return val ? 'True (صح)' : 'False (خطأ)'; return LETTERS[val]+'. '+q.options[val].t; }
+function answeredCount(){ return QUESTIONS.filter(q=>state.answers[q.id] && state.answers[q.id].answered).length; }
+function firstTryCount(){ return QUESTIONS.filter(q=>state.answers[q.id] && state.answers[q.id].answered && state.answers[q.id].firstTryCorrect).length; }
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+
+function fireConfetti(big){
+  const colors=['#f0d07c','#ffffff','#a78bfa','#34d399'];
+  confetti({particleCount: big?160:70, spread: big?100:65, origin:{y:0.6}, colors, zIndex:9999});
+  confetti({particleCount: big?70:35, angle:60, spread:60, origin:{x:0,y:0.75}, colors, zIndex:9999});
+  confetti({particleCount: big?70:35, angle:120, spread:60, origin:{x:1,y:0.75}, colors, zIndex:9999});
+}
+
+/* ==================== NAVIGATOR ==================== */
+function buildNavigator(){
+  const g1=$('navGrid1'), g2=$('navGrid2'); g1.innerHTML=''; g2.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const b=document.createElement('button');
+    b.className='nav-btn'; b.textContent=i+1; b.id='nav-'+q.id;
+    b.onclick=()=>{ FX.init(); FX.click(); goTo(i); closeDrawer(); };
+    (q.part===1?g1:g2).appendChild(b);
+  });
+}
+function updateNav(){
+  QUESTIONS.forEach((q,i)=>{
+    const b=$('nav-'+q.id); if(!b) return;
+    b.classList.remove('current','ok','mid');
+    const a=state.answers[q.id];
+    if(a && a.answered) b.classList.add(a.firstTryCorrect?'ok':'mid');
+    if(i===state.current) b.classList.add('current');
+  });
+  const n=answeredCount();
+  $('navProgText').textContent=n+' / 50';
+  $('navProgress').style.width=(n/50*100)+'%';
+  $('hdrAnswered').textContent=n;
+  $('hdrCorrect').textContent=firstTryCount();
+  $('hdrProgress').style.width=(n/50*100)+'%';
+}
+
+/* ==================== QUESTION RENDER ==================== */
+function renderQuestion(){
+  const q=QUESTIONS[state.current];
+  const a=state.answers[q.id];
+  const solved = a && a.answered;
+  const showAr = state.translated.has(q.id);
+  const partLabel = q.part===1 ? 'القسم الأول — صح / خطأ' : 'القسم الثاني — اختيار من متعدد';
+
+  let opts='';
+  if(q.type==='tf'){
+    opts = `<div class="grid sm:grid-cols-2 gap-4">
+      ${[true,false].map(v=>{
+        let cls='';
+        if(solved){ cls = (v===q.answer) ? 'opt-correct' : 'opt-dim'; }
+        else if(a && a.wrongPicks && a.wrongPicks.includes(v)) cls='opt-wrong';
+        return `<button class="opt tf-opt ${cls}" data-val="${v}" ${solved?'disabled':''} ${(a&&a.wrongPicks&&a.wrongPicks.includes(v)&&!solved)?'disabled':''}>
+          <span class="letter">${v?'T':'F'}</span>
+          <span class="flex-1">
+            <span class="block font-en font-bold text-lg" dir="ltr">${v?'TRUE':'FALSE'}</span>
+            <span class="ar-translation text-gold-200/90 text-sm font-bold mt-0.5">${v?'صحيحة':'خاطئة'}</span>
+          </span>
+          ${v?'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.6" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'}
+        </button>`;
+      }).join('')}
+    </div>`;
+  } else {
+    opts = `<div class="space-y-3">
+      ${q.options.map((o,i)=>{
+        let cls='';
+        if(solved){ cls = (i===q.answer) ? 'opt-correct' : 'opt-dim'; }
+        else if(a && a.wrongPicks && a.wrongPicks.includes(i)) cls='opt-wrong';
+        return `<button class="opt mcq-opt ${cls}" data-val="${i}" ${solved?'disabled':''} ${(a&&a.wrongPicks&&a.wrongPicks.includes(i)&&!solved)?'disabled':''}>
+          <span class="letter">${LETTERS[i]}</span>
+          <span class="flex-1 min-w-0">
+            <span class="block font-en font-semibold text-[15px] leading-snug" dir="ltr">${o.t}</span>
+            <span class="ar-translation text-gold-200/90 text-sm font-bold mt-1">${o.ar}</span>
+          </span>
+        </button>`;
+      }).join('')}
+    </div>`;
+  }
+
+  $('qCard').innerHTML = `
+    <div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-gold-500/8 blur-3xl pointer-events-none"></div>
+    <div class="flex items-center gap-2 flex-wrap mb-6">
+      <span class="chip chip-violet">${partLabel}</span>
+      <span class="chip" dir="ltr">[Page ${q.page}]</span>
+      <span class="chip chip-gold">سؤال ${state.current+1} من 50</span>
+      <div class="flex-1"></div>
+      <button id="translateBtn" class="chip ${showAr?'chip-gold':''} hover:border-gold-400/60 transition" style="cursor:pointer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+        ترجمة
+      </button>
+    </div>
+
+    <h2 class="font-en text-xl md:text-[1.55rem] font-bold leading-relaxed text-white mb-2" dir="ltr">${q.q}</h2>
+    <p class="ar-translation text-gold-200 text-base md:text-lg font-bold border-r-4 border-gold-500/60 pr-4 mb-2">${q.qAr}</p>
+
+    ${solved?`<div class="mt-4 mb-1 inline-flex items-center gap-2 chip ${a.firstTryCorrect?'st-ok':'st-mid'}" style="border-radius:99px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      ${a.firstTryCorrect?'تمت الإجابة صحيحة من أول محاولة':'تمت الإجابة صحيحة بعد '+a.attempts+' محاولات'}
+    </div>`:''}
+
+    <div class="mt-6">${opts}</div>
+
+    <div id="wrongBanner" class="hidden banner-wrong mt-5 rounded-2xl px-5 py-4 flex items-center gap-3" style="background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.4)">
+      <svg width="24" height="24" class="flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+      <span id="wrongMsg" class="font-bold text-red-200"></span>
+    </div>
+
+    <div class="flex items-center justify-between mt-8 pt-5 border-t border-white/10">
+      <button id="prevBtn" class="chip hover:border-gold-400/50 transition ${state.current===0?'opacity-30 pointer-events-none':''}" style="cursor:pointer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        السابق
+      </button>
+      <span class="text-xs font-bold text-slate-500">يمكنك التنقل بحرية من متتبع الأسئلة</span>
+      <button id="nextBtn" class="chip hover:border-gold-400/50 transition" style="cursor:pointer">
+        التالي
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+  `;
+
+  if(showAr) $('qCard').classList.add('show-ar'); else $('qCard').classList.remove('show-ar');
+
+  $('translateBtn').onclick=()=>{ FX.click();
+    if(state.translated.has(q.id)) state.translated.delete(q.id); else state.translated.add(q.id);
+    $('qCard').classList.toggle('show-ar');
+    $('translateBtn').classList.toggle('chip-gold');
+  };
+  $('prevBtn').onclick=()=>{ FX.click(); if(state.current>0) goTo(state.current-1); };
+  $('nextBtn').onclick=()=>{ FX.click(); goTo((state.current+1)%QUESTIONS.length); };
+
+  document.querySelectorAll('#qCard .opt').forEach(btn=>{
+    btn.addEventListener('click',()=>handleAnswer(q, btn));
+  });
+
+  if(window.gsap){
+    gsap.fromTo('#qCard',{opacity:0,y:26},{opacity:1,y:0,duration:.5,ease:'power3.out'});
+    gsap.fromTo('#qCard .opt',{opacity:0,x:20},{opacity:1,x:0,duration:.4,stagger:.06,delay:.12,ease:'power2.out'});
+  }
+}
+
+/* ==================== ANSWER LOGIC ==================== */
+function handleAnswer(q, btn){
+  if(state.answers[q.id] && state.answers[q.id].answered) return;
+  FX.init();
+  const raw = btn.dataset.val;
+  const val = (q.type==='tf') ? (raw==='true') : parseInt(raw);
+  if(!state.answers[q.id]) state.answers[q.id]={answered:false,attempts:0,firstTryCorrect:false,firstChoice:null,finalChoice:null,wrongPicks:[]};
+  const a=state.answers[q.id];
+  const correct = (val===q.answer);
+
+  if(correct){
+    a.attempts++;
+    a.answered=true; a.finalChoice=val;
+    if(a.attempts===1){ a.firstTryCorrect=true; a.firstChoice=val; }
+    else if(a.firstChoice===null){ a.firstChoice=val; }
+    renderQuestion();
+    updateNav();
+    FX.success();
+    setTimeout(()=>{ fireConfetti(false); showCelebration(); }, 320);
+  } else {
+    a.attempts++;
+    if(a.firstChoice===null) a.firstChoice=val;
+    a.wrongPicks.push(val);
+    btn.classList.add('opt-wrong'); btn.disabled=true;
+    FX.error();
+    const banner=$('wrongBanner');
+    $('wrongMsg').textContent = WRONG_MSGS[Math.floor(Math.random()*WRONG_MSGS.length)];
+    banner.classList.remove('hidden');
+    if(window.gsap) gsap.fromTo(banner,{opacity:0,y:10},{opacity:1,y:0,duration:.35});
+  }
+}
+
+function showCelebration(){
+  $('celebSub').textContent = SUCCESS_SUBS[Math.floor(Math.random()*SUCCESS_SUBS.length)];
+  const all = answeredCount()===QUESTIONS.length;
+  $('celebNext').innerHTML = all
+    ? 'عرض تقريري النهائي <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'
+    : 'السؤال التالي <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>';
+  $('celebration').classList.remove('hidden');
+}
+
+$('celebNext').onclick=()=>{
+  FX.click();
+  $('celebration').classList.add('hidden');
+  if(answeredCount()===QUESTIONS.length){ finish(); return; }
+  let next=-1;
+  for(let i=state.current+1;i<QUESTIONS.length;i++){ const a=state.answers[QUESTIONS[i].id]; if(!a||!a.answered){ next=i; break; } }
+  if(next===-1){ for(let i=0;i<QUESTIONS.length;i++){ const a=state.answers[QUESTIONS[i].id]; if(!a||!a.answered){ next=i; break; } } }
+  const prevPart=QUESTIONS[state.current].part;
+  goTo(next===-1?(state.current+1)%QUESTIONS.length:next);
+  if(QUESTIONS[state.current].part!==prevPart) toast('انتقلت إلى القسم الثاني — اختيار من متعدد. بالتوفيق يا بطل!');
+};
+
+function goTo(i){ state.current=i; renderQuestion(); updateNav(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+/* ==================== FINISH & REPORT ==================== */
+function tryFinish(){
+  const un = QUESTIONS.length - answeredCount();
+  if(un>0){ $('confirmUn').textContent=un; $('confirmModal').classList.remove('hidden'); }
+  else finish();
+}
+$('confirmYes').onclick=()=>{ $('confirmModal').classList.add('hidden'); finish(); };
+$('confirmNo').onclick=()=>{ $('confirmModal').classList.add('hidden'); };
+
+function finish(){
+  state.finished=true;
+  $('quizScreen').classList.add('hidden');
+  $('resultsScreen').classList.remove('hidden');
+  window.scrollTo({top:0});
+
+  const total=QUESTIONS.length;
+  let first=0, retried=0, un=0, attempts=0;
+  QUESTIONS.forEach(q=>{
+    const a=state.answers[q.id];
+    if(!a||!a.answered) un++;
+    else if(a.firstTryCorrect) first++;
+    else retried++;
+    if(a) attempts+=a.attempts;
+  });
+  const pct=Math.round(first/total*100);
+
+  $('stFirst').textContent=first; $('stRetry').textContent=retried; $('stUn').textContent=un; $('stAtt').textContent=attempts;
+  $('scoreFrac').textContent=first+' / '+total;
+
+  let msg,sub;
+  if(pct>=90){ msg='أسطوري يا عبدالله!'; sub='أداء استثنائي — أنت جاهز تماماً للكويز وستحصل على أعلى الدرجات بإذن الله.'; }
+  else if(pct>=75){ msg='ممتاز يا بطل!'; sub='مستوى رائع — راجع الأسئلة التي احتاجت محاولات وستصل للعلامة الكاملة.'; }
+  else if(pct>=50){ msg='جيد يا عبدالله!'; sub='أساسك قوي — ركز على التقرير أدناه وراجع الأخطاء وستتقن الشابتر.'; }
+  else { msg='لا تستسلم يا بطل!'; sub='كل خبير كان مبتدئاً — ادرس التقرير بالإجابات النموذجية ثم أعد المحاولة وستتفوق.'; }
+  $('gradeMsg').textContent=msg; $('gradeSub').textContent=sub;
+
+  // Animate ring & counter
+  const C=527.8, ring=$('scoreRing');
+  ring.style.strokeDashoffset=C;
+  requestAnimationFrame(()=>{ setTimeout(()=>{ ring.style.strokeDashoffset=C*(1-pct/100); },80); });
+  let c=0; const step=Math.max(1,Math.round(pct/40));
+  const iv=setInterval(()=>{ c+=step; if(c>=pct){c=pct;clearInterval(iv);} $('scorePct').textContent=c+'%'; },40);
+
+  buildReport();
+
+  if(pct>=60){ FX.init(); FX.fanfare(); fireConfetti(true); setTimeout(()=>fireConfetti(true),700); }
+
+  if(window.gsap) gsap.fromTo('#resultsScreen > div > *',{opacity:0,y:30},{opacity:1,y:0,duration:.6,stagger:.1,ease:'power3.out'});
+}
+
+function buildReport(filter){
+  filter=filter||'all';
+  const list=$('reportList'); list.innerHTML='';
+  let html='';
+  [1,2].forEach(part=>{
+    const items=QUESTIONS.filter(q=>q.part===part);
+    html+=`<div class="flex items-center gap-3 mt-8 mb-4 part-head" data-part="${part}">
+      <div class="h-px flex-1 bg-gradient-to-l from-gold-500/40 to-transparent"></div>
+      <span class="chip chip-gold">${part===1?'القسم الأول — صح / خطأ (25 سؤالاً)':'القسم الثاني — اختيار من متعدد (25 سؤالاً)'}</span>
+      <div class="h-px flex-1 bg-gradient-to-r from-gold-500/40 to-transparent"></div>
+    </div>`;
+    items.forEach(q=>{
+      const idx=QUESTIONS.indexOf(q);
+      const a=state.answers[q.id];
+      let st, stCls, your;
+      if(!a||!a.answered){ st='بدون إجابة'; stCls='st-un'; your='—'; }
+      else if(a.firstTryCorrect){ st='صحيحة من أول محاولة'; stCls='st-ok'; your=choiceText(q,a.finalChoice); }
+      else { st='صحيحة بعد '+a.attempts+' محاولات'; stCls='st-mid'; your=choiceText(q,a.firstChoice)+' (أول محاولة)'; }
+      const key=(!a||!a.answered)?'un':(a.firstTryCorrect?'ok':'mid');
+      html+=`<div class="rep-item mb-3" data-st="${key}">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm ${stCls}">${idx+1}</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="chip chip-violet" style="font-size:.7rem">${q.part===1?'صح / خطأ':'اختيارات'}</span>
+              <span class="chip" style="font-size:.7rem" dir="ltr">[Page ${q.page}]</span>
+              <span class="chip ${stCls}" style="font-size:.7rem">${st}</span>
+            </div>
+            <p class="font-en font-semibold text-[15px] text-white leading-snug mb-1" dir="ltr">${q.q}</p>
+            <p class="text-gold-200/80 text-sm font-bold mb-3">${q.qAr}</p>
+            <div class="grid sm:grid-cols-2 gap-2 text-sm">
+              <div class="rounded-xl px-3.5 py-2.5" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09)">
+                <span class="text-slate-400 font-bold">إجابة عبدالله: </span>
+                <b class="${key==='ok'?'text-emerald-300':(key==='mid'?'text-amber-300':'text-slate-400')}" dir="auto">${your}</b>
+              </div>
+              <div class="rounded-xl px-3.5 py-2.5" style="background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.25)">
+                <span class="text-slate-400 font-bold">الإجابة النموذجية: </span>
+                <b class="text-emerald-300" dir="auto">${ansText(q)}</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    });
+  });
+  list.innerHTML=html;
+  applyFilter(filter);
+}
+
+function applyFilter(f){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.filter===f));
+  document.querySelectorAll('.rep-item').forEach(it=>{ it.style.display=(f==='all'||it.dataset.st===f)?'':'none'; });
+  document.querySelectorAll('.part-head').forEach(h=>{
+    let el=h.nextElementSibling, any=false;
+    while(el && !el.classList.contains('part-head')){ if(el.classList.contains('rep-item') && el.style.display!=='none') any=true; el=el.nextElementSibling; }
+    h.style.display=any?'':'none';
+  });
+}
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>{ FX.click(); applyFilter(b.dataset.filter); }));
+
+/* ==================== WHATSAPP ==================== */
+$('waBtn').onclick=()=>{
+  const total=QUESTIONS.length;
+  let first=0, retried=0, un=0;
+  const review=[];
+  QUESTIONS.forEach((q,i)=>{
+    const a=state.answers[q.id];
+    if(!a||!a.answered){ un++; review.push('س'+(i+1)+': بدون إجابة | النموذجية: '+ansText(q)); }
+    else if(a.firstTryCorrect) first++;
+    else { retried++; review.push('س'+(i+1)+': إجابته الأولى: '+choiceText(q,a.firstChoice)+' | النموذجية: '+ansText(q)); }
+  });
+  const pct=Math.round(first/total*100);
+  let grid='';
+  QUESTIONS.forEach((q,i)=>{
+    const a=state.answers[q.id];
+    const mark=(!a||!a.answered)?'➖':(a.firstTryCorrect?'✅':'🔄');
+    grid+='س'+(i+1)+mark+( (i+1)%10===0 ? '\n' : '  ');
+  });
+  const msg =
+`🎓 *تقرير مراجعة Big Data Analytics*
+👨‍🎓 الطالب: عبدالله العبيدي
+📖 الموضوع: Introduction to Big Data Analytics - Part 2
+━━━━━━━━━━━━━━━
+📊 *النتيجة: ${first}/${total} (${pct}%)*
+✅ صحيحة من أول محاولة: ${first}
+🔄 صحيحة بعد محاولات: ${retried}
+➖ بدون إجابة: ${un}
+━━━━━━━━━━━━━━━
+📝 *خريطة الإجابات:*
+${grid}
+━━━━━━━━━━━━━━━
+📌 *الأسئلة التي تحتاج مراجعة (مع الإجابات النموذجية):*
+${review.length? review.join('\n') : 'لا يوجد — أداء كامل ومثالي! 🏆'}`;
+  window.open('https://wa.me/966540058614?text='+encodeURIComponent(msg),'_blank');
+};
+
+/* ==================== RESTART ==================== */
+$('restartBtn').onclick=()=>{
+  state.answers={}; state.translated=new Set(); state.current=0; state.finished=false;
+  $('resultsScreen').classList.add('hidden');
+  $('quizScreen').classList.remove('hidden');
+  buildNavigator(); renderQuestion(); updateNav();
+  toast('بدأت مراجعة جديدة — بالتوفيق يا عبدالله!');
+};
+
+/* ==================== UI WIRING ==================== */
+$('startBtn').onclick=()=>{
+  FX.init(); FX.click();
+  $('welcomeScreen').classList.add('hidden');
+  $('quizScreen').classList.remove('hidden');
+  buildNavigator(); renderQuestion(); updateNav();
+  toast('أهلاً بك يا عبدالله — ابدأ بالسؤال الأول وبالتوفيق!');
+};
+
+$('finishBtn').onclick=()=>{ FX.click(); tryFinish(); };
+
+$('soundBtn').onclick=()=>{
+  state.sound=!state.sound;
+  $('soundOnIco').classList.toggle('hidden',!state.sound);
+  $('soundOffIco').classList.toggle('hidden',state.sound);
+  if(state.sound){ FX.init(); FX.click(); }
+  toast(state.sound?'تم تفعيل الأصوات التحفيزية':'تم كتم الأصوات');
+};
+
+$('translateAll').addEventListener('change',e=>{
+  document.getElementById('quizScreen').classList.toggle('show-all-ar', e.target.checked);
+});
+
+/* Drawer (mobile) */
+function openDrawer(){ $('navigator').classList.add('open'); $('drawerBackdrop').classList.remove('hidden'); }
+function closeDrawer(){ $('navigator').classList.remove('open'); $('drawerBackdrop').classList.add('hidden'); }
+$('navToggle').onclick=openDrawer;
+$('navClose').onclick=closeDrawer;
+$('drawerBackdrop').onclick=closeDrawer;
+
+/* ==================== BACKGROUND PARTICLES ==================== */
+(function(){
+  const cv=$('bgParticles'), ctx=cv.getContext('2d');
+  let W,H,ps=[];
+  function resize(){ W=cv.width=innerWidth; H=cv.height=innerHeight; }
+  resize(); addEventListener('resize',resize);
+  const N = innerWidth<640?35:65;
+  for(let i=0;i<N;i++) ps.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.8+0.4,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,c:Math.random()>.5?'240,208,124':'167,139,250',a:Math.random()*.5+.15});
+  (function loop(){
+    ctx.clearRect(0,0,W,H);
+    ps.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=W; if(p.x>W)p.x=0; if(p.y<0)p.y=H; if(p.y>H)p.y=0;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba('+p.c+','+p.a+')'; ctx.fill();
+    });
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ==================== WELCOME ANIMATION ==================== */
+if(window.gsap){
+  gsap.fromTo('#wBadge',{opacity:0,y:-20},{opacity:1,y:0,duration:.7,ease:'power3.out'});
+  gsap.fromTo('#wTitle',{opacity:0,scale:.85},{opacity:1,scale:1,duration:.9,delay:.15,ease:'back.out(1.6)'});
+  gsap.fromTo('#wSub',{opacity:0,y:16},{opacity:1,y:0,duration:.7,delay:.35});
+  gsap.fromTo('#wCard',{opacity:0,y:34},{opacity:1,y:0,duration:.8,delay:.5,ease:'power3.out'});
+  gsap.fromTo('#startBtn',{opacity:0,y:20},{opacity:1,y:0,duration:.7,delay:.75});
+}
+</script>
+</body>
+</html>
